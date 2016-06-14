@@ -1,12 +1,13 @@
 import Html exposing (Html, Attribute, text, div, input)
+import Html.App exposing (beginnerProgram)
 import Html.Attributes exposing (placeholder, value, style)
-import Html.Events exposing (on, targetValue)
-import Signal exposing (Address)
-import StartApp.Simple exposing (start)
+import Html.Events exposing (onInput)
 import String exposing (toInt)
 import Maybe exposing (withDefault)
 import List exposing (map, map2)
 import List.Extra exposing (scanl1)
+
+type Msg = SetYear String
 
 lastFridays : Int -> List Int
 lastFridays year =
@@ -29,24 +30,20 @@ lastFridayStrings yearString =
        Err _ -> 
            [errString]
 
-main = start { model = "", view = view, update = update }
-
-update newStr oldStr = newStr
-
-view : Address String -> String -> Html
-view address yearString =
+view :  String -> Html Msg
+view yearString =
   div []
     ([ input
         [ placeholder "Enter a year."
         , value yearString
-        , on "input" targetValue (Signal.message address)
+        , onInput SetYear
         , myStyle
         ]
         []
      ] ++ (lastFridayStrings yearString
            |> map (\date -> div [ myStyle ] [ text date ]) ))
 
-myStyle : Attribute
+myStyle : Attribute Msg
 myStyle =
   style
     [ ("width", "100%")
@@ -55,3 +52,17 @@ myStyle =
     , ("font-size", "1em")
     , ("text-align", "left")
     ]
+
+update : Msg -> String -> String
+update msg _ = 
+    case msg of
+        SetYear yearString -> yearString
+
+
+main =
+    beginnerProgram
+        { model = ""
+        , view = view
+        , update = update
+        }
+
